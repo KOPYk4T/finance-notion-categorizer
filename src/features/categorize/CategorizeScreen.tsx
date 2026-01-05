@@ -1,9 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { Transaction } from "../../shared/types";
 import { NavigationHeader } from "./NavigationHeader";
 import { ProgressBar } from "./ProgressBar";
 import { TransactionCard } from "./TransactionCard";
 import { SearchModal } from "./SearchModal";
+import { KeyboardHint } from "../../components/KeyboardHint";
+import { MassEditModal } from "./MassEditModal";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { AddToNotionButton } from "../../components/AddToNotionButton";
+import { categories } from "../../shared/constants/categories";
+import { formatMoney } from "../../shared/utils";
+import { AccountSelectorModal } from "../complete/AccountSelectorModal";
+import { Button } from "../../components/Button";
+import {
+  uploadTransactionsToNotion,
+  isNotionConfigured,
+} from "../../shared/services/notionService";
 
 interface CategorizeScreenProps {
   transactions: Transaction[];
@@ -11,11 +23,12 @@ interface CategorizeScreenProps {
   slideDirection: "left" | "right";
   onCategoryChange: (index: number, category: string) => void;
   onRecurringChange: (index: number, isRecurring: boolean) => void;
-  onDelete: (index: number) => void;
   onPrev: () => void;
   onNext: () => void;
-  onGoToEnd: () => void;
   onGoToIndex: (index: number) => void;
+  onMassCategoryChange?: (ids: number[], category: string) => void;
+  onMassRecurringChange?: (ids: number[], isRecurring: boolean) => void;
+  onUploadSuccess?: (uploadedCount: number) => void;
 }
 
 export const CategorizeScreen = ({
@@ -24,15 +37,43 @@ export const CategorizeScreen = ({
   slideDirection,
   onCategoryChange,
   onRecurringChange,
-  onDelete,
   onPrev,
   onNext,
-  onGoToEnd,
   onGoToIndex,
+  onMassCategoryChange,
+  onMassRecurringChange,
+  onUploadSuccess,
 }: CategorizeScreenProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [massEditIds, setMassEditIds] = useState<number[]>([]);
+  const [viewMode, setViewMode] = useState<"normal" | "table">(() => {
+    const saved = localStorage.getItem("finance-categorizer-view-mode");
+    return saved === "table" || saved === "normal" ? saved : "normal";
+  });
+  const [showAccountSelector, setShowAccountSelector] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
+  const [reviewedTransactions, setReviewedTransactions] = useState<Set<number>>(
+    new Set()
+  );
+  const [showUnreviewedAlert, setShowUnreviewedAlert] = useState(false);
+  const [pendingUpload, setPendingUpload] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
   const current = transactions[currentIndex];
   const progress = ((currentIndex + 1) / transactions.length) * 100;
+
+  // Calcular transacciones con IA y cuántas están revisadas
+  const aiTransactions = transactions.filter(
+    (t) => t.confidence === "low" || t.confidence === "ai"
+  );
+  const aiReviewedCount = aiTransactions.filter((t) =>
+    reviewedTransactions.has(t.id)
+  ).length;
+
+  // Guardar viewMode en localStorage cuando cambie
+  useEffect(() => {
+    localStorage.setItem("finance-categorizer-view-mode", viewMode);
+  }, [viewMode]);
 
   const handleCategoryChange = (category: string) => {
     onCategoryChange(currentIndex, category);
@@ -42,11 +83,91 @@ export const CategorizeScreen = ({
     onRecurringChange(currentIndex, isRecurring);
   };
 
-  const handleDelete = () => {
-    onDelete(currentIndex);
+  // Marcar transacción como revisada cuando el usuario navega a ella (solo en vista normal)
+  useEffect(() => {
+    if (viewMode === "normal" && current) {
+      setReviewedTransactions((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(current.id);
+        return newSet;
+      });
+    }
+  }, [currentIndex, viewMode, current]);
+
+  const handleMassEdit = (ids: number[]) => {
+    setMassEditIds(ids);
+    setIsSearchOpen(false);
   };
 
-  // Keyboard shortcut for search (Cmd/Ctrl + K or /)
+  const handleMassEditApply = (category?: string, isRecurring?: boolean) => {
+    if (category && onMassCategoryChange) {
+      onMassCategoryChange(massEditIds, category);
+    }
+    if (isRecurring !== undefined && onMassRecurringChange) {
+      onMassRecurringChange(massEditIds, isRecurring);
+    }
+    setMassEditIds([]);
+  };
+
+  const selectedTransactions = transactions.filter((t) =>
+    massEditIds.includes(t.id)
+  );
+
+  const handleTableSelect = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= transactions.length) return;
+
+      const transactionId = transactions[index]?.id;
+      if (!transactionId) return;
+
+      setHighlightedIndex(index);
+
+      setTimeout(() => {
+        if (!tableRef.current) return;
+
+        const row = tableRef.current.querySelector(
+          `tr[data-transaction-id="${transactionId}"]`
+        ) as HTMLTableRowElement | null;
+
+        if (row) {
+          row.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 100);
+    },
+    [transactions]
+  );
+
+  const handleUploadClick = useCallback(() => {
+    if (!isNotionConfigured()) {
+      alert("Notion no está configurado. Verifica las variables de entorno.");
+      return;
+    }
+
+    if (transactions.length === 0) {
+      alert("No hay transacciones para subir.");
+      return;
+    }
+
+    if (viewMode === "normal") {
+      const aiTransactions = transactions.filter(
+        (t) =>
+          (t.confidence === "low" || t.confidence === "ai") &&
+          !reviewedTransactions.has(t.id)
+      );
+
+      if (aiTransactions.length > 0) {
+        setPendingUpload(true);
+        setShowUnreviewedAlert(true);
+        return;
+      }
+    }
+
+    setShowAccountSelector(true);
+  }, [viewMode, transactions, reviewedTransactions]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -67,11 +188,300 @@ export const CategorizeScreen = ({
         setIsSearchOpen(true);
         return;
       }
+      if ((e.key === "v" || e.key === "V") && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setViewMode((prev) => {
+          const newMode = prev === "normal" ? "table" : "normal";
+          localStorage.setItem("finance-categorizer-view-mode", newMode);
+          return newMode;
+        });
+        return;
+      }
+      if (
+        e.key === "Enter" &&
+        currentIndex === transactions.length - 1 &&
+        viewMode === "normal"
+      ) {
+        e.preventDefault();
+        handleUploadClick();
+        return;
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchOpen]);
+  }, [
+    isSearchOpen,
+    currentIndex,
+    transactions.length,
+    viewMode,
+    handleUploadClick,
+  ]);
+
+  const handleUnreviewedConfirm = () => {
+    setShowUnreviewedAlert(false);
+    if (pendingUpload) {
+      setPendingUpload(false);
+      setShowAccountSelector(true);
+    }
+  };
+
+  const handleUnreviewedCancel = () => {
+    setShowUnreviewedAlert(false);
+    setPendingUpload(false);
+  };
+
+  const handleAccountSelected = async (accountId?: string) => {
+    setShowAccountSelector(false);
+
+    if (!isNotionConfigured()) {
+      alert("Notion no está configurado. Verifica las variables de entorno.");
+      return;
+    }
+
+    if (transactions.length === 0) {
+      alert("No hay transacciones para subir.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const result = await uploadTransactionsToNotion(
+        transactions,
+        accountId,
+        () => {} // Progress callback - no needed here
+      );
+
+      if (result.success) {
+        // Llamar al callback de éxito para redirigir a la pantalla de confeti
+        if (onUploadSuccess) {
+          onUploadSuccess(result.uploaded);
+        } else {
+          alert(`¡Éxito! ${result.uploaded} transacciones subidas a Notion.`);
+        }
+      } else {
+        alert(
+          `Se subieron ${result.uploaded} de ${
+            transactions.length
+          } transacciones. ${result.errors?.[0] || "Error desconocido"}`
+        );
+      }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Error al subir a Notion");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Si está en modo tabla, mostrar la vista completa de tabla
+  if (viewMode === "table") {
+    return (
+      <>
+        <SearchModal
+          transactions={transactions}
+          currentIndex={currentIndex}
+          isOpen={isSearchOpen}
+          onClose={() => {
+            setIsSearchOpen(false);
+          }}
+          onSelect={(index) => {
+            setIsSearchOpen(false);
+            setTimeout(() => {
+              handleTableSelect(index);
+            }, 50);
+          }}
+          onMassEdit={onMassCategoryChange ? handleMassEdit : undefined}
+        />
+        <MassEditModal
+          isOpen={massEditIds.length > 0}
+          selectedTransactions={selectedTransactions}
+          onClose={() => setMassEditIds([])}
+          onApply={handleMassEditApply}
+        />
+        <AccountSelectorModal
+          isOpen={showAccountSelector}
+          onConfirm={handleAccountSelected}
+          onCancel={() => setShowAccountSelector(false)}
+        />
+        <div className="min-h-screen bg-neutral-50 flex flex-col font-sans relative">
+          <div
+            className="flex-1 overflow-auto pb-20"
+            ref={tableRef}
+            style={{ animation: "fadeIn 0.3s ease-out" }}
+          >
+            <div className="max-w-[95vw] mx-auto p-8">
+              <table className="w-full border-collapse bg-white rounded-lg shadow-sm overflow-hidden">
+                <thead>
+                  <tr className="border-b border-neutral-200 bg-neutral-50/50">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      Fecha
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      Descripción
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      Monto
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      Categoría
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      Recurrente
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-neutral-600 uppercase tracking-wider">
+                      IA
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-neutral-100">
+                  {transactions.map((transaction, index) => (
+                    <tr
+                      key={transaction.id}
+                      data-transaction-id={transaction.id}
+                      className={`transition-all duration-200 group ${
+                        highlightedIndex === index ? "bg-purple-100" : ""
+                      }`}
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-700 font-light">
+                        {transaction.date}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-neutral-900 font-normal">
+                        {transaction.description}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium tabular-nums text-right">
+                        <span
+                          className={
+                            transaction.type === "cargo"
+                              ? "text-red-600"
+                              : "text-green-600"
+                          }
+                        >
+                          {transaction.type === "cargo" ? "-" : "+"}
+                          {formatMoney(transaction.amount)}
+                        </span>
+                      </td>
+                      <td
+                        className="px-4 py-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <select
+                          value={
+                            transaction.selectedCategory ||
+                            transaction.suggestedCategory ||
+                            ""
+                          }
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            onCategoryChange(index, e.target.value);
+                          }}
+                          className="inline-flex items-center text-xs font-medium px-2.5 py-1 bg-neutral-100 text-neutral-700 rounded-md appearance-none cursor-pointer
+                                   focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-0 transition-all duration-200 hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
+                        >
+                          {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td
+                        className="px-4 py-3 text-center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <label className="inline-flex items-center cursor-pointer">
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              checked={transaction.isRecurring || false}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                onRecurringChange(index, e.target.checked);
+                              }}
+                              className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-900 peer-focus:ring-offset-0 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
+                          </div>
+                        </label>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {transaction.confidence === "low" ||
+                        transaction.confidence === "ai" ? (
+                          <span className="inline-flex items-center text-xs font-medium px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md">
+                            IA
+                          </span>
+                        ) : (
+                          <span className="text-sm text-neutral-300">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {/* Barra flotante inferior */}
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-neutral-200/60">
+            <div className="max-w-[95vw] mx-auto px-6 py-3 flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setViewMode("normal");
+                  localStorage.setItem(
+                    "finance-categorizer-view-mode",
+                    "normal"
+                  );
+                }}
+                className="flex items-center gap-2 hover:bg-neutral-100/50"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                <span>Vista normal</span>
+              </Button>
+              <div className="flex items-center">
+                <KeyboardHint
+                  shortcuts={[
+                    { keys: ["V"], label: "cambiar vista" },
+                    {
+                      combinations: [["/"], ["Meta", "K"]],
+                      label: "buscar",
+                    },
+                  ]}
+                  size="sm"
+                />
+              </div>
+            </div>
+          </div>
+          {/* Botón flotante para subir a Notion */}
+          <div className="fixed bottom-20 right-6 z-50">
+            <AddToNotionButton
+              onClick={handleUploadClick}
+              disabled={transactions.length === 0}
+              isUploading={isUploading}
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Calcular transacciones IA no revisadas para el mensaje
+  const unreviewedAICount = transactions.filter(
+    (t) =>
+      (t.confidence === "low" || t.confidence === "ai") &&
+      !reviewedTransactions.has(t.id)
+  ).length;
 
   return (
     <>
@@ -81,54 +491,96 @@ export const CategorizeScreen = ({
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onSelect={onGoToIndex}
+        onMassEdit={onMassCategoryChange ? handleMassEdit : undefined}
+      />
+      <MassEditModal
+        isOpen={massEditIds.length > 0}
+        selectedTransactions={selectedTransactions}
+        onClose={() => setMassEditIds([])}
+        onApply={handleMassEditApply}
+      />
+      <ConfirmDialog
+        isOpen={showUnreviewedAlert}
+        title="Transacciones IA sin revisar"
+        message={`Tienes ${unreviewedAICount} transacción${
+          unreviewedAICount > 1 ? "es" : ""
+        } categorizada${
+          unreviewedAICount > 1 ? "s" : ""
+        } por IA que aún no has revisado. ¿Deseas continuar de todas formas?`}
+        confirmText="Sí, continuar"
+        cancelText="Cancelar"
+        onConfirm={handleUnreviewedConfirm}
+        onCancel={handleUnreviewedCancel}
+      />
+      <AccountSelectorModal
+        isOpen={showAccountSelector}
+        onConfirm={handleAccountSelected}
+        onCancel={() => setShowAccountSelector(false)}
       />
 
-      <div className="min-h-screen bg-white flex flex-col font-sans">
+      <div
+        className="min-h-screen bg-white flex flex-col font-sans relative"
+        style={{ animation: "fadeIn 0.3s ease-out" }}
+      >
         <NavigationHeader
           currentIndex={currentIndex}
           totalCount={transactions.length}
+          aiReviewedCount={aiReviewedCount}
+          aiTotalCount={aiTransactions.length}
           onPrev={onPrev}
           onNext={onNext}
         />
 
-        <ProgressBar progress={progress} />
+        <ProgressBar
+          progress={progress}
+          currentIndex={currentIndex}
+          totalCount={transactions.length}
+          transactions={transactions}
+          onNavigate={onGoToIndex}
+        />
 
         {/* Content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 py-12">
+        <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 pb-24">
           {current && (
             <TransactionCard
               transaction={current}
               slideDirection={slideDirection}
               onCategoryChange={handleCategoryChange}
               onRecurringChange={handleRecurringChange}
-              onDelete={handleDelete}
             />
           )}
         </div>
 
-        {/* Action buttons */}
-        {currentIndex < transactions.length - 1 && (
-          <div className="px-8 pb-6 flex justify-center">
-            <button
-              onClick={onGoToEnd}
-              className="text-xs text-neutral-400 hover:text-neutral-600 
-                     transition-colors duration-300 font-light px-4 py-2
-                     hover:bg-neutral-50 rounded-lg"
-            >
-              Ir al final
-            </button>
-          </div>
-        )}
+        {/* Barra inferior fija con keyboard hints */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-100 px-8 py-4 z-40">
+          <KeyboardHint
+            shortcuts={[
+              { keys: ["ArrowLeft", "ArrowRight"], label: "navegar" },
+              {
+                keys: ["Shift", "ArrowLeft"],
+                lastKeyAlternatives: ["ArrowRight"],
+                label: "saltar 10",
+              },
+              { keys: ["Home"], label: "inicio" },
+              { keys: ["End"], label: "fin" },
+              { keys: ["Enter"], label: "continuar" },
+              { keys: ["R"], label: "recurrente" },
+              {
+                combinations: [["/"], ["Meta", "K"]],
+                label: "buscar",
+              },
+              { keys: ["V"], label: "vista tabla" },
+            ]}
+          />
+        </div>
 
-        {/* Keyboard hint */}
-        <div className="px-8 py-6 text-center space-y-1">
-          <p className="text-xs text-neutral-300 font-light tracking-wide">
-            ← → navegar · Shift+←→ saltar 10 · Home/End inicio/fin
-          </p>
-          <p className="text-xs text-neutral-300 font-light tracking-wide">
-            Enter continuar · Delete saltar · Espacio toggle recurrente · / o
-            Cmd+K buscar
-          </p>
+        {/* Botón flotante para subir a Notion - encima de la barra */}
+        <div className="fixed bottom-20 right-6 z-50">
+          <AddToNotionButton
+            onClick={handleUploadClick}
+            disabled={transactions.length === 0}
+            isUploading={isUploading}
+          />
         </div>
       </div>
     </>

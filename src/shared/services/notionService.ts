@@ -370,7 +370,6 @@ export async function getNotionAccounts(): Promise<NotionAccount[]> {
 
     return accounts;
   } catch (error) {
-    console.error("Error al obtener cuentas de Notion:", error);
     throw error instanceof Error
       ? error
       : new Error(`Error desconocido al obtener cuentas: ${error}`);

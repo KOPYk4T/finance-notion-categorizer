@@ -1,3 +1,5 @@
+import { ModalFooter } from "./ModalFooter";
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -35,25 +37,12 @@ export const ConfirmDialog = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3 p-6 pt-0 border-t border-neutral-200">
-          <button
-            onClick={onCancel}
-            className="flex-1 px-4 py-3 text-sm font-light text-neutral-600 
-                     hover:text-neutral-900 hover:bg-neutral-50 rounded-xl
-                     transition-all duration-200"
-          >
-            {cancelText}
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 px-4 py-3 text-sm font-light text-white bg-neutral-900
-                     hover:bg-neutral-800 rounded-xl
-                     transition-all duration-200
-                     hover:scale-[1.02] active:scale-[0.98]"
-          >
-            {confirmText}
-          </button>
-        </div>
+        <ModalFooter
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          cancelText={cancelText}
+          confirmText={confirmText}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getNotionAccounts, type NotionAccount } from "../../shared/services/notionService";
+import { ModalFooter } from "../../components/ModalFooter";
 
 interface AccountSelectorModalProps {
   isOpen: boolean;
@@ -86,7 +87,7 @@ export const AccountSelectorModal = ({
                 <button
                   type="button"
                   onClick={() => setSelectedAccountId("")}
-                  className={`w-full px-3 py-2.5 rounded-lg text-left transition-colors duration-200
+                  className={`w-full px-3 py-2.5 rounded-lg text-left transition-colors duration-200 cursor-pointer
                            flex items-center gap-3
                            ${
                              selectedAccountId === ""
@@ -103,7 +104,7 @@ export const AccountSelectorModal = ({
                       key={account.id}
                       type="button"
                       onClick={() => setSelectedAccountId(account.id)}
-                      className={`w-full px-3 py-2.5 rounded-lg text-left transition-colors duration-200
+                      className={`w-full px-3 py-2.5 rounded-lg text-left transition-colors duration-200 cursor-pointer
                                flex items-center gap-3
                                ${
                                  isSelected
@@ -165,27 +166,13 @@ export const AccountSelectorModal = ({
 
         </div>
 
-        <div className="flex items-center gap-3 p-6 pt-0 border-t border-neutral-200">
-          <button
-            onClick={onCancel}
-            className="flex-1 px-4 py-3 text-sm font-light text-neutral-600 
-                     hover:text-neutral-900 hover:bg-neutral-50 rounded-xl
-                     transition-all duration-200"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleConfirm}
-            disabled={isLoading}
-            className="flex-1 px-4 py-3 text-sm font-light text-white bg-neutral-900
-                     hover:bg-neutral-800 rounded-xl
-                     transition-all duration-200
-                     hover:scale-[1.02] active:scale-[0.98]
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Continuar
-          </button>
-        </div>
+        <ModalFooter
+          onCancel={onCancel}
+          onConfirm={handleConfirm}
+          confirmText="Continuar"
+          confirmDisabled={isLoading}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

@@ -7,9 +7,12 @@ import {
 } from "../shared/services/categorySuggestions";
 import {
   categorizeBatchWithGroq,
+  // TODO: Habilitar cuando queramos usar Gemini
+  // categorizeBatchWithGemini,
   isGroqAvailable,
+  // isGeminiAvailable,
   type BatchCategoryItem,
-} from "../shared/services/groqCategoryService";
+} from "../shared/services";
 
 type Step = "upload" | "processing" | "categorize" | "complete";
 type SlideDirection = "left" | "right";
@@ -22,11 +25,15 @@ interface UseTransactionNavigationReturn {
   slideDirection: SlideDirection;
   fileName: string;
   error: string | null;
+  uploadedCount: number;
   handleFileSelect: (file: File) => void;
   handleCategoryChange: (index: number, category: string) => void;
   handleRecurringChange: (index: number, isRecurring: boolean) => void;
   handleDelete: (index: number) => void;
   handleRestore: (index: number) => void;
+  handleMassCategoryChange: (ids: number[], category: string) => void;
+  handleMassRecurringChange: (ids: number[], isRecurring: boolean) => void;
+  handleUploadSuccess: (uploadedCount: number) => void;
   goNext: () => void;
   goPrev: () => void;
   goToEnd: () => void;
@@ -51,6 +58,7 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
   const [error, setError] = useState<string | null>(null);
   const [nextId, setNextId] = useState(1);
   const [showConfirmReset, setShowConfirmReset] = useState(false);
+  const [uploadedCount, setUploadedCount] = useState(0);
   const pendingResetRef = useRef<(() => void) | null>(null);
 
   const handleFileSelect = async (file: File) => {
@@ -104,6 +112,25 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
 
       if (transactionsNeedingAI.length > 0) {
         try {
+          // TODO: En el futuro, podemos usar Gemini como alternativa o preferencia
+          // if (isGeminiAvailable()) {
+          //   try {
+          //     aiResults = await categorizeBatchWithGemini(transactionsNeedingAI);
+          //   } catch (geminiError) {
+          //     console.warn("Error con Gemini, intentando con Groq:", geminiError);
+          //     if (isGroqAvailable()) {
+          //       aiResults = await categorizeBatchWithGroq(transactionsNeedingAI);
+          //     } else {
+          //       throw geminiError;
+          //     }
+          //   }
+          // } else if (isGroqAvailable()) {
+          //   aiResults = await categorizeBatchWithGroq(transactionsNeedingAI);
+          // } else {
+          //   throw new Error("No hay servicios AI disponibles");
+          // }
+
+          // Por ahora solo usamos Groq
           const aiResults = await categorizeBatchWithGroq(
             transactionsNeedingAI
           );
@@ -126,10 +153,7 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
             }
           }
         } catch (error) {
-          console.error(
-            "Error al categorizar batch con IA, manteniendo categorías por defecto:",
-            error
-          );
+          console.error("Error categorizando transacciones:", error);
         }
       }
 
@@ -177,7 +201,6 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
 
       if (newTransactions.length === 0) {
         setCurrentIndex(0);
-        setStep("complete");
       } else if (index >= newTransactions.length) {
         setCurrentIndex(newTransactions.length - 1);
       }
@@ -208,15 +231,27 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
     });
   };
 
+  const handleMassCategoryChange = (ids: number[], category: string) => {
+    setTransactions((prev) => {
+      return prev.map((t) =>
+        ids.includes(t.id) ? { ...t, selectedCategory: category } : t
+      );
+    });
+  };
+
+  const handleMassRecurringChange = (ids: number[], isRecurring: boolean) => {
+    setTransactions((prev) => {
+      return prev.map((t) => (ids.includes(t.id) ? { ...t, isRecurring } : t));
+    });
+  };
+
   const goNext = () => {
     setCurrentIndex((prevIndex) => {
       if (prevIndex < transactions.length - 1) {
         setSlideDirection("right");
         return prevIndex + 1;
-      } else {
-        setStep("complete");
-        return prevIndex;
       }
+      return prevIndex;
     });
   };
 
@@ -351,23 +386,28 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
         return;
       }
 
-      // Space for toggle recurring (only if not on button)
-      if (e.key === " " && !(e.target instanceof HTMLButtonElement)) {
+      // R for toggle recurring
+      if (
+        (e.key === "r" || e.key === "R") &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement) &&
+        !(e.target instanceof HTMLButtonElement) &&
+        !(e.target instanceof HTMLElement && e.target.isContentEditable)
+      ) {
         e.preventDefault();
         toggleRecurring();
         return;
       }
 
-      // Normal navigation
-      if (e.key === "ArrowRight" || e.key === "Enter") {
+      if (e.key === "ArrowRight") {
         setCurrentIndex((prevIndex) => {
           if (prevIndex < transactions.length - 1) {
             setSlideDirection("right");
             return prevIndex + 1;
-          } else {
-            setStep("complete");
-            return prevIndex;
           }
+          return prevIndex;
         });
         return;
       }
@@ -398,7 +438,6 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
 
           if (newTransactions.length === 0) {
             setCurrentIndex(0);
-            setStep("complete");
           } else if (currentIndex >= newTransactions.length) {
             setCurrentIndex(newTransactions.length - 1);
           }
@@ -411,13 +450,19 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [step, transactions.length, currentIndex, transactions]);
+  }, [
+    step,
+    transactions.length,
+    currentIndex,
+    transactions,
+    handleRecurringChange,
+  ]);
 
   // Prevenir pérdida de progreso al cerrar/recargar
   useEffect(() => {
     const hasProgress =
       transactions.length > 0 || deletedTransactions.length > 0;
-    const isProcessing = step === "categorize" || step === "complete";
+    const isProcessing = step === "categorize";
 
     if (!hasProgress || !isProcessing) {
       return;
@@ -433,6 +478,11 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [transactions.length, deletedTransactions.length, step]);
 
+  const handleUploadSuccess = (count: number) => {
+    setUploadedCount(count);
+    setStep("complete");
+  };
+
   return {
     step,
     transactions,
@@ -441,11 +491,15 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
     slideDirection,
     fileName,
     error,
+    uploadedCount,
     handleFileSelect,
     handleCategoryChange,
     handleRecurringChange,
     handleDelete,
     handleRestore,
+    handleMassCategoryChange,
+    handleMassRecurringChange,
+    handleUploadSuccess,
     goNext,
     goPrev,
     goToEnd,

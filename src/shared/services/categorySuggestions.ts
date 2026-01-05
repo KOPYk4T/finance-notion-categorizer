@@ -1,5 +1,6 @@
 import type { Confidence } from "../types";
 import type { TransactionType } from "../types/transaction";
+import { applyTemplates } from "./templateService";
 
 interface CategoryRule {
   keywords: string[];
@@ -234,6 +235,15 @@ export function suggestCategory(
   description: string,
   transactionType: TransactionType
 ): { category: string; confidence: Confidence } {
+  // Primero aplicar plantillas personalizadas
+  const templateResult = applyTemplates(description);
+  if (templateResult) {
+    return {
+      category: templateResult.category,
+      confidence: templateResult.confidence === "high" ? "high" : "low",
+    };
+  }
+
   const upperDescription = description.toUpperCase();
 
   for (const rule of categoryRules) {

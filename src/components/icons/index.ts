@@ -4,4 +4,5 @@ export { Upload } from './Upload';
 export { Check } from './Check';
 export { Trash } from './Trash';
 export { Restore } from './Restore';
+export { NotionIcon } from './NotionIcon';
 
