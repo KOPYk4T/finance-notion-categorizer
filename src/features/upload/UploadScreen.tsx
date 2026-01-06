@@ -62,7 +62,7 @@ export const UploadScreen = ({ onFileSelect }: UploadScreenProps) => {
       <div className="w-full max-w-2xl space-y-12 animate-[fadeUp_0.7s_cubic-bezier(0.16,1,0.3,1)]">
         <div className="text-center space-y-4">
           <h1 className="text-6xl font-extralight tracking-[-0.02em] text-neutral-900">
-            Cartola
+            FinanzIA
           </h1>
           <p className="text-neutral-500 font-light text-lg">
             Sube tu archivo Excel para comenzar
