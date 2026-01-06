@@ -4,7 +4,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Obtener el path desde los parámetros
+  // Obtener el path desde los query params (viene del rewrite)
   const { path } = req.query;
   const notionPath = Array.isArray(path) ? path.join("/") : path || "";
 

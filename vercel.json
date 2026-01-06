@@ -1,6 +1,12 @@
 {
+  "rewrites": [
+    {
+      "source": "/api/notion/:path*",
+      "destination": "/api/notion/proxy?path=:path*"
+    }
+  ],
   "functions": {
-    "api/**/*.js": {
+    "api/notion/proxy.js": {
       "memory": 1024,
       "maxDuration": 10
     }
