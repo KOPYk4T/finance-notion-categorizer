@@ -11,6 +11,7 @@ interface SearchModalProps {
   onClose: () => void;
   onSelect: (index: number) => void;
   onMassEdit?: (selectedIds: number[]) => void;
+  onMassDelete?: (selectedIds: number[]) => void;
 }
 
 interface ActiveFilters {
@@ -27,6 +28,7 @@ export const SearchModal = ({
   onClose,
   onSelect,
   onMassEdit,
+  onMassDelete,
 }: SearchModalProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedResultIndex, setSelectedResultIndex] = useState(0);
@@ -126,6 +128,13 @@ export const SearchModal = ({
   const handleMassEdit = () => {
     if (onMassEdit && selectedIds.size > 0) {
       onMassEdit(Array.from(selectedIds));
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleMassDelete = () => {
+    if (onMassDelete && selectedIds.size > 0) {
+      onMassDelete(Array.from(selectedIds));
       setSelectedIds(new Set());
     }
   };
@@ -430,14 +439,26 @@ export const SearchModal = ({
                 </span>
               </label>
               {selectedIds.size > 0 && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={handleMassEdit}
-                  className="shadow-sm"
-                >
-                  Editar {selectedIds.size} seleccionada{selectedIds.size !== 1 ? "s" : ""}
-                </Button>
+                <div className="flex items-center gap-2">
+                  {onMassDelete && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleMassDelete}
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      Eliminar {selectedIds.size}
+                    </Button>
+                  )}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleMassEdit}
+                    className="shadow-sm"
+                  >
+                    Editar {selectedIds.size}
+                  </Button>
+                </div>
               )}
             </div>
           )}

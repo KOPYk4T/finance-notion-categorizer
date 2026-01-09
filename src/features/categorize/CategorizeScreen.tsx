@@ -8,6 +8,8 @@ import { KeyboardHint } from "../../components/KeyboardHint";
 import { MassEditModal } from "./MassEditModal";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { AddToNotionButton } from "../../components/AddToNotionButton";
+import { HistoryButton } from "../../components/HistoryButton";
+import { HistorySidebar } from "../../components/HistorySidebar";
 import { categories } from "../../shared/constants/categories";
 import { formatMoney } from "../../shared/utils";
 import { AccountSelectorModal } from "../complete/AccountSelectorModal";
@@ -20,11 +22,14 @@ import {
 
 interface CategorizeScreenProps {
   transactions: Transaction[];
+  deletedTransactions: Transaction[];
   currentIndex: number;
   slideDirection: "left" | "right";
   onCategoryChange: (index: number, category: string) => void;
   onRecurringChange: (index: number, isRecurring: boolean) => void;
   onDelete: (index: number) => void;
+  onRestore: (index: number) => void;
+  onMassDelete?: (ids: number[]) => void;
   onPrev: () => void;
   onNext: () => void;
   onGoToIndex: (index: number) => void;
@@ -35,11 +40,14 @@ interface CategorizeScreenProps {
 
 export const CategorizeScreen = ({
   transactions,
+  deletedTransactions,
   currentIndex,
   slideDirection,
   onCategoryChange,
   onRecurringChange,
   onDelete,
+  onRestore,
+  onMassDelete,
   onPrev,
   onNext,
   onGoToIndex,
@@ -48,6 +56,7 @@ export const CategorizeScreen = ({
   onUploadSuccess,
 }: CategorizeScreenProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [massEditIds, setMassEditIds] = useState<number[]>([]);
   const [viewMode, setViewMode] = useState<"normal" | "table">(() => {
     const saved = localStorage.getItem("finance-categorizer-view-mode");
@@ -99,6 +108,13 @@ export const CategorizeScreen = ({
 
   const handleMassEdit = (ids: number[]) => {
     setMassEditIds(ids);
+    setIsSearchOpen(false);
+  };
+
+  const handleMassDeleteFromSearch = (ids: number[]) => {
+    if (onMassDelete) {
+      onMassDelete(ids);
+    }
     setIsSearchOpen(false);
   };
 
@@ -294,6 +310,7 @@ export const CategorizeScreen = ({
             }, 50);
           }}
           onMassEdit={onMassCategoryChange ? handleMassEdit : undefined}
+          onMassDelete={onMassDelete ? handleMassDeleteFromSearch : undefined}
         />
         <MassEditModal
           isOpen={massEditIds.length > 0}
@@ -481,7 +498,13 @@ export const CategorizeScreen = ({
               </div>
             </div>
           </div>
-          {/* Botón flotante para subir a Notion */}
+          {/* Botones flotantes - posiciones fijas individuales */}
+          <div className="fixed bottom-[156px] right-6 z-50">
+            <HistoryButton
+              count={deletedTransactions.length}
+              onClick={() => setIsHistoryOpen(true)}
+            />
+          </div>
           <div className="fixed bottom-20 right-6 z-50">
             <AddToNotionButton
               onClick={handleUploadClick}
@@ -489,6 +512,14 @@ export const CategorizeScreen = ({
               isUploading={isUploading}
             />
           </div>
+
+          {/* Sidebar de historial */}
+          <HistorySidebar
+            isOpen={isHistoryOpen}
+            deletedTransactions={deletedTransactions}
+            onClose={() => setIsHistoryOpen(false)}
+            onRestore={onRestore}
+          />
         </div>
       </>
     );
@@ -510,6 +541,7 @@ export const CategorizeScreen = ({
         onClose={() => setIsSearchOpen(false)}
         onSelect={onGoToIndex}
         onMassEdit={onMassCategoryChange ? handleMassEdit : undefined}
+        onMassDelete={onMassDelete ? handleMassDeleteFromSearch : undefined}
       />
       <MassEditModal
         isOpen={massEditIds.length > 0}
@@ -592,7 +624,13 @@ export const CategorizeScreen = ({
           />
         </div>
 
-        {/* Botón flotante para subir a Notion - encima de la barra */}
+        {/* Botones flotantes - posiciones fijas individuales */}
+        <div className="fixed bottom-[156px] right-6 z-50">
+          <HistoryButton
+            count={deletedTransactions.length}
+            onClick={() => setIsHistoryOpen(true)}
+          />
+        </div>
         <div className="fixed bottom-20 right-6 z-50">
           <AddToNotionButton
             onClick={handleUploadClick}
@@ -600,6 +638,14 @@ export const CategorizeScreen = ({
             isUploading={isUploading}
           />
         </div>
+
+        {/* Sidebar de historial */}
+        <HistorySidebar
+          isOpen={isHistoryOpen}
+          deletedTransactions={deletedTransactions}
+          onClose={() => setIsHistoryOpen(false)}
+          onRestore={onRestore}
+        />
       </div>
     </>
   );

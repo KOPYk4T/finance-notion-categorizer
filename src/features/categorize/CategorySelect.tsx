@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Coffee,
   MoreHorizontal,
+  Coins,
 } from 'lucide-react';
 
 interface CategorySelectProps {
@@ -135,6 +136,11 @@ const categoryConfig: Record<
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
     icon: TrendingUp,
+  },
+  'Ingresos extra': {
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-50',
+    icon: Coins,
   },
   Otros: {
     color: 'text-neutral-600',

@@ -31,6 +31,7 @@ interface UseTransactionNavigationReturn {
   handleRecurringChange: (index: number, isRecurring: boolean) => void;
   handleDelete: (index: number) => void;
   handleRestore: (index: number) => void;
+  handleMassDelete: (ids: number[]) => void;
   handleMassCategoryChange: (ids: number[], category: string) => void;
   handleMassRecurringChange: (ids: number[], isRecurring: boolean) => void;
   handleUploadSuccess: (uploadedCount: number) => void;
@@ -45,6 +46,29 @@ interface UseTransactionNavigationReturn {
   handleConfirmReset: () => void;
   handleCancelReset: () => void;
 }
+
+// Función para ordenar transacciones por fecha (más antigua primero)
+const sortTransactionsByDate = (transactions: Transaction[]): Transaction[] => {
+  return [...transactions].sort((a, b) => {
+    // Parsear fechas en formato DD/MM/YYYY
+    const parseDate = (dateStr: string): number => {
+      const parts = dateStr.split("/");
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Meses en JS son 0-indexed
+        const year = parseInt(parts[2], 10);
+        return new Date(year, month, day).getTime();
+      }
+      return 0;
+    };
+
+    const dateA = parseDate(a.date);
+    const dateB = parseDate(b.date);
+
+    // Orden ascendente (más antigua primero)
+    return dateA - dateB;
+  });
+};
 
 export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
   const [step, setStep] = useState<Step>("upload");
@@ -158,7 +182,8 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
       }
 
       setNextId(idCounter);
-      setTransactions(convertedTransactions);
+      // Ordenar transacciones por fecha antes de mostrarlas
+      setTransactions(sortTransactionsByDate(convertedTransactions));
       setStep("categorize");
     } catch (err) {
       setError(
@@ -220,14 +245,55 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
           return prevTransactions;
         }
 
-        const updated = [...prevTransactions, restored];
-        setCurrentIndex(updated.length - 1);
+        // Guardar la transacción actual para mantener la vista
+        const currentTransaction = prevTransactions[currentIndex];
+
+        // Agregar la transacción restaurada y ordenar
+        const updated = sortTransactionsByDate([...prevTransactions, restored]);
+
+        // Encontrar el nuevo índice de la transacción actual
+        if (currentTransaction) {
+          const newIndex = updated.findIndex((t) => t.id === currentTransaction.id);
+          if (newIndex !== -1) {
+            setCurrentIndex(newIndex);
+          }
+        }
+
         setSlideDirection("right");
         setStep("categorize");
         return updated;
       });
 
       return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleMassDelete = (ids: number[]) => {
+    setTransactions((prev) => {
+      // Guardar las transacciones eliminadas
+      const toDelete = prev.filter((t) => ids.includes(t.id));
+
+      setDeletedTransactions((prevDeleted) => {
+        const newDeleted = [...prevDeleted];
+        toDelete.forEach((deleted) => {
+          if (!newDeleted.some((t) => t.id === deleted.id)) {
+            newDeleted.push(deleted);
+          }
+        });
+        return newDeleted;
+      });
+
+      // Filtrar las transacciones eliminadas
+      const newTransactions = prev.filter((t) => !ids.includes(t.id));
+
+      // Ajustar el índice actual si es necesario
+      if (newTransactions.length === 0) {
+        setCurrentIndex(0);
+      } else if (currentIndex >= newTransactions.length) {
+        setCurrentIndex(newTransactions.length - 1);
+      }
+
+      return newTransactions;
     });
   };
 
@@ -497,6 +563,7 @@ export const useTransactionNavigation = (): UseTransactionNavigationReturn => {
     handleRecurringChange,
     handleDelete,
     handleRestore,
+    handleMassDelete,
     handleMassCategoryChange,
     handleMassRecurringChange,
     handleUploadSuccess,

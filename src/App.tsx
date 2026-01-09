@@ -9,6 +9,7 @@ function App() {
   const {
     step,
     transactions,
+    deletedTransactions,
     currentIndex,
     slideDirection,
     fileName,
@@ -18,6 +19,8 @@ function App() {
     handleCategoryChange,
     handleRecurringChange,
     handleDelete,
+    handleRestore,
+    handleMassDelete,
     handleMassCategoryChange,
     handleMassRecurringChange,
     handleUploadSuccess,
@@ -42,11 +45,14 @@ function App() {
     return (
       <CategorizeScreen
         transactions={transactions}
+        deletedTransactions={deletedTransactions}
         currentIndex={currentIndex}
         slideDirection={slideDirection}
         onCategoryChange={handleCategoryChange}
         onRecurringChange={handleRecurringChange}
         onDelete={handleDelete}
+        onRestore={handleRestore}
+        onMassDelete={handleMassDelete}
         onPrev={goPrev}
         onNext={goNext}
         onGoToIndex={goToIndex}

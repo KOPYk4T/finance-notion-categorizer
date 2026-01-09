@@ -37,6 +37,7 @@ export const categories = [
   // Financieras
   "Ahorro",
   "Inversiones",
+  "Ingresos extra",
 
   // Miscelánea
   "Otros",
