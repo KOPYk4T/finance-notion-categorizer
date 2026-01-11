@@ -386,7 +386,7 @@ export const CategorizeScreen = ({
                         {transaction.description}
                       </td>
                       <td 
-                        className="px-4 py-3 whitespace-nowrap text-sm font-medium tabular-nums text-right cursor-pointer hover:bg-neutral-50 transition-colors"
+                        className="px-4 py-3 whitespace-nowrap text-sm font-medium tabular-nums text-right cursor-pointer hover:bg-neutral-50 transition-colors select-none"
                         onClick={(e) => {
                           e.stopPropagation();
                           if (onTypeChange) {

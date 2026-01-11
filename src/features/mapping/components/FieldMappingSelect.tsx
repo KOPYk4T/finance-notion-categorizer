@@ -33,7 +33,11 @@ export const FieldMappingSelect = ({
   const Icon = field.icon;
 
   // useClickOutside expects RefObject<HTMLElement>, so we cast HTMLDivElement ref
-  useClickOutside(containerRef as React.RefObject<HTMLElement>, () => setIsOpen(false), isOpen);
+  useClickOutside(
+    containerRef as React.RefObject<HTMLElement>,
+    () => setIsOpen(false),
+    isOpen
+  );
 
   const handleSelect = (option: string) => {
     onChange(option);
@@ -44,7 +48,8 @@ export const FieldMappingSelect = ({
     }
   };
 
-  const formatLabel = dateFormat === "auto" || !dateFormat ? "Auto" : dateFormat;
+  const formatLabel =
+    dateFormat === "auto" || !dateFormat ? "Auto" : dateFormat;
 
   return (
     <div ref={containerRef} className="relative flex-1">
@@ -65,11 +70,17 @@ export const FieldMappingSelect = ({
         <div className="flex-1 text-left">
           <div className="text-xs font-medium text-neutral-500 mb-0.5">
             {field.label}
-            {optional && <span className="text-neutral-400 ml-1">(Opcional)</span>}
+            {optional && (
+              <span className="text-neutral-400 ml-1">(Opcional)</span>
+            )}
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-sm font-semibold ${value ? "text-neutral-900" : "text-neutral-400 italic"}`}>
-              {value || (optional ? "Ninguna" : "Seleccionar columna...")}
+            <span
+              className={`text-sm font-semibold ${
+                value ? "text-neutral-900" : "text-neutral-400 italic"
+              }`}
+            >
+              {value || (optional ? "Ninguna" : "Ninguna")}
             </span>
             {field.key === "date" && value && (
               <span className="px-2 py-0.5 text-xs font-medium text-neutral-600 bg-neutral-200 rounded">
