@@ -30,7 +30,7 @@ export const TransactionCard = ({
         <div className="flex-1 space-y-6">
           {/* Description */}
           <div>
-            <p className="text-2xl font-normal text-neutral-900 leading-relaxed">
+            <p className="text-3xl font-medium text-neutral-900 leading-relaxed">
               {transaction.description}
             </p>
           </div>
@@ -38,19 +38,21 @@ export const TransactionCard = ({
           {/* Amount, Date & Type */}
           <div className="flex items-center gap-4 flex-wrap">
             <span
-              className={`text-xl font-light tabular-nums ${
+              className={`text-2xl font-medium tabular-nums ${
                 transaction.type === "cargo" ? "text-red-600" : "text-green-600"
               }`}
             >
               {transaction.type === "cargo" ? "-" : "+"}
               {formatMoney(transaction.amount)}
             </span>
-            <span className="text-sm text-neutral-400 font-light">
+            <span className="text-sm text-neutral-500 font-light">
               {transaction.date}
             </span>
             <button
-              onClick={() => onTypeChange(transaction.type === "cargo" ? "abono" : "cargo")}
-              className={`text-xs font-light px-2.5 py-1 rounded-full cursor-pointer transition-all hover:scale-105 ${
+              onClick={() =>
+                onTypeChange(transaction.type === "cargo" ? "abono" : "cargo")
+              }
+              className={`text-xs font-medium px-2.5 py-1 rounded-full cursor-pointer transition-all hover:scale-105 ${
                 transaction.type === "cargo"
                   ? "bg-red-50 text-red-600 hover:bg-red-100"
                   : "bg-green-50 text-green-600 hover:bg-green-100"
@@ -65,7 +67,7 @@ export const TransactionCard = ({
         <div className="flex-1 space-y-6">
           {/* Category Select */}
           <div className="space-y-3">
-            <label className="text-sm font-normal text-neutral-500">
+            <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
               Categoría
             </label>
             <CategorySelect
@@ -73,6 +75,11 @@ export const TransactionCard = ({
                 transaction.selectedCategory || transaction.suggestedCategory
               }
               onChange={onCategoryChange}
+              isAISuggested={
+                !transaction.selectedCategory &&
+                (transaction.confidence === "ai" ||
+                  transaction.confidence === "low")
+              }
             />
           </div>
 
@@ -88,7 +95,7 @@ export const TransactionCard = ({
                 />
                 <div className="w-10 h-5 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-900 peer-focus:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
               </div>
-              <span className="text-sm font-normal text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
+              <span className="text-sm font-medium text-neutral-700 group-hover:text-neutral-900 transition-colors duration-200">
                 Recurrente
               </span>
             </label>

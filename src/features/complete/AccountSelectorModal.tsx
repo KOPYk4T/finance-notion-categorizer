@@ -57,29 +57,29 @@ export const AccountSelectorModal = ({
       >
         <div className="p-6 space-y-6">
           <div>
-            <h3 className="text-xl font-light text-neutral-900 mb-2">
+            <h3 className="text-2xl font-medium text-neutral-900 mb-2">
               Configurar subida a Notion
             </h3>
-            <p className="text-sm font-light text-neutral-600">
+            <p className="text-base font-normal text-neutral-600">
               Selecciona la cuenta para las transacciones
             </p>
           </div>
 
           {/* Account Selector */}
           <div className="space-y-2">
-            <label className="block text-sm font-light text-neutral-700">
+            <label className="block text-sm font-medium text-neutral-700">
               Cuenta
             </label>
             {isLoading ? (
-              <div className="px-4 py-3 bg-neutral-50 rounded-xl text-sm text-neutral-400 font-light">
+              <div className="px-4 py-3 bg-neutral-50 rounded-xl text-sm text-neutral-400 font-medium">
                 Cargando cuentas...
               </div>
             ) : error ? (
-              <div className="px-4 py-3 bg-red-50 rounded-xl text-sm text-red-600 font-light">
+              <div className="px-4 py-3 bg-red-50 rounded-xl text-sm text-red-600 font-medium">
                 {error}
               </div>
             ) : accounts.length === 0 ? (
-              <div className="px-4 py-3 bg-amber-50 rounded-xl text-sm text-amber-600 font-light">
+              <div className="px-4 py-3 bg-amber-50 rounded-xl text-sm text-amber-600 font-medium">
                 No se encontraron cuentas. Configura VITE_NOTION_ACCOUNTS_DATABASE_ID
               </div>
             ) : (
@@ -136,7 +136,7 @@ export const AccountSelectorModal = ({
                         </div>
                       )}
                       {/* Nombre de la cuenta */}
-                      <span className="text-sm font-normal text-neutral-900 flex-1">
+                      <span className="text-sm font-medium text-neutral-900 flex-1">
                         {account.name}
                       </span>
                       {/* Indicador de selección */}

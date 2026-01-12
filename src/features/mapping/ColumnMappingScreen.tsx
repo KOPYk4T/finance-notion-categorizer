@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Button } from "../../components/Button";
 import { ColumnMapperNotion } from "./ColumnMapperNotion";
 import { isMappingValid } from "../../shared/utils/validationUtils";
-import type { ColumnMapping, FileStructure } from "../../shared/types/fileMapping";
+import type {
+  ColumnMapping,
+  FileStructure,
+} from "../../shared/types/fileMapping";
+import { Stepper } from "../../components/Stepper";
+import { ChevronLeft } from "../../components/icons";
+import { BrandHeader } from "../../components/BrandHeader";
 
 interface ColumnMappingScreenProps {
   structure: FileStructure;
@@ -21,12 +27,28 @@ export const ColumnMappingScreen = ({
 }: ColumnMappingScreenProps) => {
   const [mapping, setMapping] = useState<ColumnMapping>(initialMapping);
 
+  const steps = ["Importar", "Asignar columnas"];
+  const currentStep = 1;
+
   const handleConfirm = () => {
     onConfirm(mapping);
   };
 
   return (
     <div className="h-screen bg-white flex flex-col font-sans overflow-hidden">
+      {/* Header */}
+      <div className="w-full border-b border-neutral-200 bg-white">
+        <div className="max-w-full mx-auto px-12 py-5">
+          <div className="flex items-center justify-between">
+            <BrandHeader />
+            <div className="flex-1 flex justify-center">
+              <Stepper steps={steps} currentStep={currentStep} />
+            </div>
+            <div className="w-[180px]"></div>
+          </div>
+        </div>
+      </div>
+
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col px-12 pt-8 pb-4 overflow-hidden">
         <div className="flex-1 min-h-0 overflow-hidden">
@@ -40,35 +62,20 @@ export const ColumnMappingScreen = ({
       </div>
 
       {/* Footer fijo */}
-      <div className="w-full border-t border-neutral-200 bg-white z-30 ">
+      <div className="w-full border-t border-neutral-200 bg-white z-30">
         <div className="max-w-full mx-auto px-12 py-4">
           <div className="flex items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              {["date", "description", "amount"].map((field) => {
-                const isMapped = field === "amount"
-                  ? !!(mapping.amount || mapping.cargo || mapping.abono)
-                  : !!mapping[field as keyof ColumnMapping];
-
-                return (
-                  <div
-                    key={field}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      isMapped ? "bg-neutral-900" : "bg-neutral-200"
-                    }`}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              <Button variant="secondary" onClick={onCancel}>
-                Cancelar
-              </Button>
-              <Button onClick={handleConfirm} disabled={!isMappingValid(mapping)}>
-                Continuar
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              onClick={onCancel}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirm} disabled={!isMappingValid(mapping)}>
+              Continuar
+            </Button>
           </div>
         </div>
       </div>

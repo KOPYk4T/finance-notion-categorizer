@@ -21,135 +21,91 @@ import {
   Coffee,
   MoreHorizontal,
   Coins,
+  Sparkles,
 } from 'lucide-react';
 
 interface CategorySelectProps {
   value: string;
   onChange: (category: string) => void;
+  isAISuggested?: boolean;
 }
 
 const categoryConfig: Record<
   string,
-  { color: string; bgColor: string; icon: React.ElementType }
+  { icon: React.ElementType }
 > = {
   Sueldo: {
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
     icon: Wallet,
   },
   Arriendo: {
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
     icon: Home,
   },
   'Gastos Básicos': {
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
     icon: Zap,
   },
   Supermercado: {
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
     icon: ShoppingCart,
   },
   Transporte: {
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
     icon: Car,
   },
   Salud: {
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
     icon: Heart,
   },
   Estética: {
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50',
     icon: Scissors,
   },
   Lavandería: {
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50',
     icon: Shirt,
   },
   Trabajo: {
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
     icon: Building2,
   },
   Restaurant: {
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
     icon: UtensilsCrossed,
   },
   Delivery: {
-    color: 'text-rose-600',
-    bgColor: 'bg-rose-50',
     icon: Coffee,
   },
   Cine: {
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50',
     icon: Film,
   },
   Conciertos: {
-    color: 'text-fuchsia-600',
-    bgColor: 'bg-fuchsia-50',
     icon: Music,
   },
   Streaming: {
-    color: 'text-sky-600',
-    bgColor: 'bg-sky-50',
     icon: Film,
   },
   Juegos: {
-    color: 'text-lime-600',
-    bgColor: 'bg-lime-50',
     icon: Gamepad2,
   },
   Libros: {
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
     icon: Book,
   },
   Vestimenta: {
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50',
     icon: Shirt,
   },
   Deporte: {
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
     icon: Dumbbell,
   },
   Decoración: {
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
     icon: Sofa,
   },
   Ahorro: {
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
     icon: Wallet,
   },
   Inversiones: {
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
     icon: TrendingUp,
   },
   'Ingresos extra': {
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50',
     icon: Coins,
   },
   Otros: {
-    color: 'text-neutral-600',
-    bgColor: 'bg-neutral-50',
     icon: MoreHorizontal,
   },
 };
 
-export const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
+export const CategorySelect = ({ value, onChange, isAISuggested = false }: CategorySelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -157,7 +113,7 @@ export const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
 
   const selectedCategory = value || categories[0];
   const config = categoryConfig[selectedCategory] || categoryConfig.Otros;
-  const Icon = config.icon;
+  const DisplayIcon = isAISuggested ? Sparkles : config.icon;
 
   const filteredCategories = categories.filter((cat) =>
     cat.toLowerCase().includes(searchQuery.toLowerCase())
@@ -205,13 +161,15 @@ export const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
         }`}
       >
         <div
-          className={`p-2 rounded-lg ${config.bgColor} ${config.color} transition-transform duration-200 ${
-            isOpen ? 'scale-110' : ''
-          }`}
+          className={`p-2 rounded-lg transition-transform duration-200 ${
+            isAISuggested 
+              ? 'bg-neutral-900' 
+              : 'bg-neutral-900'
+          } ${isOpen ? 'scale-110' : ''}`}
         >
-          <Icon className="w-4 h-4" />
+          <DisplayIcon className={`w-4 h-4 ${isAISuggested ? 'text-white' : 'text-white'}`} />
         </div>
-        <span className="flex-1 text-left font-normal text-neutral-900">
+        <span className="flex-1 text-left text-base font-medium text-neutral-900">
           {selectedCategory}
         </span>
         <svg
@@ -266,23 +224,23 @@ export const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
                     onClick={() => handleSelect(category)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
                       isSelected
-                        ? `${catConfig.bgColor} ${catConfig.color} font-medium`
-                        : 'hover:bg-neutral-50 text-neutral-700'
+                        ? 'bg-neutral-100 font-medium'
+                        : 'hover:bg-neutral-50 text-neutral-900'
                     }`}
                   >
                     <div
-                      className={`p-1.5 rounded-md transition-all duration-200 ${
+                      className={`p-1.5 rounded-md transition-all duration-200 bg-neutral-900 ${
                         isSelected
-                          ? `${catConfig.bgColor} ${catConfig.color} scale-110`
-                          : `${catConfig.bgColor} ${catConfig.color} opacity-60 group-hover:opacity-100 group-hover:scale-110`
+                          ? 'scale-110'
+                          : 'opacity-80 group-hover:opacity-100 group-hover:scale-110'
                       }`}
                     >
-                      <CatIcon className="w-3.5 h-3.5" />
+                      <CatIcon className="w-3.5 h-3.5 text-white" />
                     </div>
                     <span className="flex-1 text-left text-sm">{category}</span>
                     {isSelected && (
                       <svg
-                        className={`w-4 h-4 ${catConfig.color} animate-[pulse_0.5s_ease-in-out]`}
+                        className="w-4 h-4 text-neutral-600 animate-[pulse_0.5s_ease-in-out]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

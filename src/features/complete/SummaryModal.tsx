@@ -38,8 +38,8 @@ export const SummaryModal = ({
         {/* Header */}
         <div className="px-6 py-5 border-b border-neutral-200 flex items-center justify-between bg-gradient-to-r from-neutral-50/50 to-white flex-shrink-0">
           <div className="space-y-1">
-            <h2 className="text-2xl font-light text-neutral-900">Resumen</h2>
-            <p className="text-sm text-neutral-500 font-light">
+            <h2 className="text-2xl font-medium text-neutral-900">Resumen</h2>
+            <p className="text-sm text-neutral-500 font-medium">
               {transactions.length} transacciones
             </p>
           </div>
@@ -104,11 +104,11 @@ export const SummaryModal = ({
                       className={`border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition-colors duration-150
                         ${index % 2 === 0 ? "bg-white" : "bg-neutral-50/30"}`}
                     >
-                      <td className="px-6 py-4 text-sm font-light text-neutral-600 whitespace-nowrap">
+                      <td className="px-6 py-4 text-sm font-medium text-neutral-600 whitespace-nowrap">
                         {transaction.date}
                       </td>
                       <td 
-                        className="px-6 py-4 text-sm font-normal text-neutral-900"
+                        className="px-6 py-4 text-sm font-medium text-neutral-900"
                         onClick={() => {
                           if (onTransactionClick) {
                             onTransactionClick(index);

@@ -1,5 +1,6 @@
 import { motion, useMotionValue, useSpring, useMotionValueEvent } from 'motion/react';
 import { useState, useEffect } from 'react';
+import { Sparkles } from 'lucide-react';
 
 interface AIProgressBadgeProps {
   current: number;
@@ -32,7 +33,7 @@ const Sparkle = ({ delay = 0, x = 0, y = 0 }: { delay?: number; x?: number; y?: 
       viewBox="0 0 14 14"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-blue-400 drop-shadow-sm"
+      className="text-neutral-500"
     >
       <path
         d="M7 0L8.082 4.221L12.303 5.303L8.082 6.385L7 10.606L5.918 6.385L1.697 5.303L5.918 4.221L7 0Z"
@@ -77,11 +78,7 @@ export const AIProgressBadge = ({ current, total }: AIProgressBadgeProps) => {
         opacity: 1, 
         scale: 1,
       }}
-      className={`relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors duration-300 overflow-visible ${
-        isComplete
-          ? 'bg-blue-50 border-blue-200/60 shadow-sm'
-          : 'bg-blue-50/80 border-blue-200/40'
-      }`}
+      className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 border border-neutral-200 transition-colors duration-300 overflow-visible"
     >
       {/* Sparkles */}
       {showSparkles && (
@@ -92,18 +89,18 @@ export const AIProgressBadge = ({ current, total }: AIProgressBadgeProps) => {
         </>
       )}
       
+      <Sparkles className="w-3 h-3 text-neutral-900" />
       <motion.span
         key={displayCount}
         initial={{ scale: 1.3, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="text-xs font-semibold text-blue-600 tabular-nums"
+        className="text-xs font-medium text-neutral-900 tabular-nums"
       >
         {displayCount}
       </motion.span>
-      <span className="text-xs text-blue-400">/</span>
-      <span className="text-xs font-semibold text-blue-600 tabular-nums">{total}</span>
-      <span className="text-[10px] text-blue-500 font-medium ml-0.5">IA</span>
+      <span className="text-xs text-neutral-400">/</span>
+      <span className="text-xs font-medium text-neutral-900 tabular-nums">{total}</span>
     </motion.div>
   );
 };

@@ -57,7 +57,7 @@ export const MassEditModal = ({
       >
         {/* Header */}
         <div className="p-6 border-b border-neutral-200">
-          <h3 className="text-xl font-light text-neutral-900">
+          <h3 className="text-2xl font-medium text-neutral-900">
             Editar {selectedTransactions.length} transacciones
           </h3>
         </div>
@@ -67,13 +67,13 @@ export const MassEditModal = ({
           {/* Edit Controls */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-light text-neutral-600 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Cambiar categoría
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 text-sm font-light text-neutral-900 
+                className="w-full px-4 py-2 text-sm font-medium text-neutral-900 
                          bg-neutral-50 border border-neutral-200 rounded-xl
                          focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
               >
@@ -87,7 +87,7 @@ export const MassEditModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-light text-neutral-600 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Cambiar tipo de transacción
               </label>
               <div className="flex items-center gap-4">
@@ -119,7 +119,7 @@ export const MassEditModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-light text-neutral-600 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Marcar como recurrente
               </label>
               <div className="flex items-center gap-4">
@@ -153,7 +153,7 @@ export const MassEditModal = ({
 
           {/* Preview List */}
           <div className="space-y-2">
-            <p className="text-sm font-light text-neutral-600">
+            <p className="text-sm font-medium text-neutral-700">
               Transacciones seleccionadas:
             </p>
             <div className="space-y-1 max-h-64 overflow-y-auto">
@@ -169,11 +169,11 @@ export const MassEditModal = ({
                     className="p-3 bg-neutral-50 rounded-xl text-sm"
                   >
                     <div className="flex items-start justify-between mb-1">
-                      <p className="font-light text-neutral-900 flex-1">
+                      <p className="font-medium text-neutral-900 flex-1">
                         {transaction.description}
                       </p>
                       <span
-                        className={`text-xs font-light tabular-nums ml-2 ${
+                        className={`text-xs font-medium tabular-nums ml-2 ${
                           transaction.type === "cargo"
                             ? "text-red-600"
                             : "text-green-600"

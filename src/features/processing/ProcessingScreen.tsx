@@ -3,13 +3,18 @@ interface ProcessingScreenProps {
   error?: string | null;
 }
 
-export const ProcessingScreen = ({ fileName, error }: ProcessingScreenProps) => {
+export const ProcessingScreen = ({
+  fileName,
+  error,
+}: ProcessingScreenProps) => {
   if (error) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 font-sans">
         <div className="space-y-8 text-center max-w-md">
           <div className="space-y-2">
-            <p className="text-2xl font-light text-red-600">Error al procesar</p>
+            <p className="text-2xl font-light text-red-600">
+              Error al procesar
+            </p>
             <p className="text-sm text-neutral-400 font-light">{error}</p>
           </div>
         </div>
@@ -19,16 +24,24 @@ export const ProcessingScreen = ({ fileName, error }: ProcessingScreenProps) => 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 font-sans">
       <div className="space-y-8 text-center animate-[fadeIn_0.5s_ease-out]">
-        <div className="relative w-12 h-12 mx-auto">
-          <div className="absolute inset-0 border-2 border-neutral-100 rounded-full" />
-          <div className="absolute inset-0 border-2 border-neutral-900 rounded-full border-r-transparent border-b-transparent animate-spin" style={{ animationDuration: '0.8s' }} />
-        </div>
-        <div className="space-y-2">
-          <p className="text-2xl font-light text-neutral-900">Procesando</p>
-          <p className="text-sm text-neutral-400 font-light tracking-wide">{fileName}</p>
+        <div className="flex flex-col items-center space-y-6">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-96 h-96 object-contain"
+          >
+            <source src="/loading.mp4" type="video/mp4" />
+          </video>
+          <div className="space-y-2">
+            <p className="text-2xl font-medium text-neutral-900">Meowding...</p>
+            <p className="text-sm text-neutral-500 font-light tracking-wide">
+              {fileName}
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-

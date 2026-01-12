@@ -53,7 +53,7 @@ export const FloatingButton = ({
       onMouseLeave={() => setIsHovered(false)}
       className={`relative flex items-center bg-white border-2 border-neutral-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${className}`}
       animate={{
-        borderRadius: isExpanded ? "12px" : "50%",
+        borderRadius: isExpanded ? "4px" : "50%",
         width: isExpanded ? expandedWidth : COLLAPSED_WIDTH,
         justifyContent: isExpanded ? "flex-start" : "center",
         paddingLeft: isExpanded ? "16px" : "0px",

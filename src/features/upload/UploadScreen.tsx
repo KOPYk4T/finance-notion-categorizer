@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
-import { Upload as UploadIcon } from "../../components/icons";
+import { useRef } from "react";
+import { motion } from "motion/react";
 import { validateFile } from "../../shared/utils/validationUtils";
+import { Button } from "../../components/Button";
 
 interface UploadScreenProps {
   onFileSelect: (file: File) => void;
@@ -8,37 +9,9 @@ interface UploadScreenProps {
 
 export const UploadScreen = ({ onFileSelect }: UploadScreenProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && validateFile(file)) {
-      onFileSelect(file);
-    } else if (file) {
-      alert("Por favor, selecciona un archivo Excel (.xls o .xlsx)");
-    }
-  };
-
-  const handleClick = () => fileInputRef.current?.click();
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const file = e.dataTransfer.files?.[0];
     if (file && validateFile(file)) {
       onFileSelect(file);
     } else if (file) {
@@ -48,77 +21,65 @@ export const UploadScreen = ({ onFileSelect }: UploadScreenProps) => {
     }
   };
 
+  const handleClick = () => fileInputRef.current?.click();
+
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 font-sans">
-      <div className="w-full max-w-2xl space-y-12 animate-[fadeUp_0.7s_cubic-bezier(0.16,1,0.3,1)]">
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-4 mb-2">
-            <img src="/Noticat.svg" alt="Noticat" className="w-24 h-24" />
-            <h1 className="text-6xl font-extralight tracking-[-0.02em] text-neutral-900">
-              Noticat
-            </h1>
-          </div>
-        </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".xls,.xlsx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={handleClick}
-          className={`group cursor-pointer block w-full focus:outline-none transition-all duration-300 ${
-            isDragging ? "scale-[1.01]" : ""
-          }`}
+    <div className="min-h-screen bg-white flex items-center justify-center font-sans">
+      <div className="flex flex-col items-center gap-12">
+        <motion.div
+          initial={{ opacity: 0, y: -60, scale: 0.8, rotate: -5 }}
+          animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 200,
+            damping: 15,
+            duration: 0.8,
+          }}
         >
-          <div
-            className={`border-2 rounded-3xl p-20 transition-all duration-300 ease-out ${
-              isDragging
-                ? "border-neutral-400 bg-neutral-100 border-dashed"
-                : "border-neutral-200 hover:border-neutral-300 hover:bg-white group-hover:shadow-lg group-hover:shadow-neutral-100/50"
-            }`}
+          <img
+            src="/Box.svg"
+            alt="Upload"
+            className="w-52 h-52 animate-sketchy"
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.3, rotate: -10 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 20,
+            delay: 0.3,
+            duration: 0.7,
+          }}
+          className="flex flex-col items-center gap-4"
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xls,.xlsx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <motion.div
+            whileHover={{ scale: 1.05, rotate: 1 }}
+            whileTap={{ scale: 0.95, rotate: -1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
-            <div className="flex flex-col items-center space-y-6">
-              <div
-                className={`p-5 rounded-2xl transition-colors duration-300 ${
-                  isDragging
-                    ? "bg-neutral-200"
-                    : "bg-neutral-100 group-hover:bg-neutral-200"
-                }`}
-              >
-                <UploadIcon
-                  className={`w-10 h-10 transition-colors duration-300 ${
-                    isDragging
-                      ? "text-neutral-700"
-                      : "text-neutral-400 group-hover:text-neutral-600"
-                  }`}
-                />
-              </div>
-              <div className="text-center space-y-2">
-                <span
-                  className={`block font-light text-lg transition-colors duration-300 ${
-                    isDragging
-                      ? "text-neutral-700"
-                      : "text-neutral-400 group-hover:text-neutral-600"
-                  }`}
-                >
-                  {isDragging
-                    ? "Suelta el archivo aquí"
-                    : "Arrastra tu archivo aquí o haz clic para seleccionar"}
-                </span>
-                <span className="block text-sm text-neutral-400 font-light">
-                  Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv)
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+            <Button onClick={handleClick} size="lg">
+              Importar archivo
+            </Button>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.4 }}
+            className="text-sm text-neutral-400 font-light"
+          >
+            .xlsx, .xls, .csv
+          </motion.p>
+        </motion.div>
       </div>
     </div>
   );

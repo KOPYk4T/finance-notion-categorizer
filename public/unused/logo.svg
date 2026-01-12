@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Carpeta principal (centro, más grande) -->
+  <path d="M30 48 L30 78 L58 78 L64 72 L85 72 L85 52 L58 52 Z" fill="#000"/>
+  <path d="M30 48 L58 48 L64 52 L58 52 Z" fill="#000" fill-opacity="0.6"/>
+  
+  <!-- Carpeta categoría izquierda (más pequeña) -->
+  <path d="M18 38 L18 56 L35 56 L39 52 L48 52 L48 42 L35 42 Z" fill="#000" fill-opacity="0.5"/>
+  <path d="M18 38 L35 38 L39 42 L35 42 Z" fill="#000" fill-opacity="0.3"/>
+  
+  <!-- Carpeta categoría derecha (más pequeña) -->
+  <path d="M72 38 L72 56 L89 56 L93 52 L102 52 L102 42 L89 42 Z" fill="#000" fill-opacity="0.5"/>
+  <path d="M72 38 L89 38 L93 42 L89 42 Z" fill="#000" fill-opacity="0.3"/>
+  
+  <!-- Líneas de conexión sutiles -->
+  <line x1="44" y1="54" x2="37" y2="49" stroke="#000" stroke-width="1.2" stroke-opacity="0.15" stroke-linecap="round"/>
+  <line x1="76" y1="54" x2="83" y2="49" stroke="#000" stroke-width="1.2" stroke-opacity="0.15" stroke-linecap="round"/>
+</svg>

@@ -3,6 +3,7 @@ import type { Transaction } from "../../shared/types";
 import { NavigationHeader } from "./NavigationHeader";
 import { ProgressBar } from "./ProgressBar";
 import { TransactionCard } from "./TransactionCard";
+import { AIProgressBadge } from "./AIProgressBadge";
 import { SearchModal } from "./SearchModal";
 import { KeyboardHint } from "../../components/KeyboardHint";
 import { MassEditModal } from "./MassEditModal";
@@ -15,6 +16,8 @@ import { formatMoney } from "../../shared/utils";
 import { AccountSelectorModal } from "../complete/AccountSelectorModal";
 import { Button } from "../../components/Button";
 import { Trash } from "../../components/icons";
+import { TableSelect } from "../../components/TableSelect";
+import { BrandHeader } from "../../components/BrandHeader";
 import {
   uploadTransactionsToNotion,
   isNotionConfigured,
@@ -128,7 +131,11 @@ export const CategorizeScreen = ({
     setIsSearchOpen(false);
   };
 
-  const handleMassEditApply = (category?: string, isRecurring?: boolean, type?: "cargo" | "abono") => {
+  const handleMassEditApply = (
+    category?: string,
+    isRecurring?: boolean,
+    type?: "cargo" | "abono"
+  ) => {
     if (category && onMassCategoryChange) {
       onMassCategoryChange(massEditIds, category);
     }
@@ -337,143 +344,157 @@ export const CategorizeScreen = ({
           onConfirm={handleAccountSelected}
           onCancel={() => setShowAccountSelector(false)}
         />
-        <div className="min-h-screen bg-neutral-50 flex flex-col font-sans relative">
+        <div className="h-screen bg-white flex flex-col font-sans relative overflow-hidden">
+          {/* Header con info */}
+          <div className="flex-shrink-0 border-b border-neutral-100 bg-white z-20">
+            <div className="px-12 py-4">
+              <div className="flex items-center justify-between">
+                <BrandHeader />
+                {aiTransactions.length > 0 && (
+                  <AIProgressBadge
+                    current={aiReviewedCount}
+                    total={aiTransactions.length}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
           <div
-            className="flex-1 overflow-auto pb-20"
+            className="flex-1 relative z-10 overflow-hidden"
             ref={tableRef}
             style={{ animation: "fadeIn 0.3s ease-out" }}
           >
-            <div className="max-w-[95vw] mx-auto p-8">
-              <table className="w-full border-collapse bg-white rounded-lg shadow-sm overflow-hidden">
-                <thead>
-                  <tr className="border-b border-neutral-200 bg-neutral-50/50">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
-                      Fecha
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
-                      Descripción
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-600 uppercase tracking-wider">
-                      Monto
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">
-                      Categoría
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-neutral-600 uppercase tracking-wider">
-                      Recurrente
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-neutral-600 uppercase tracking-wider">
-                      IA
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-neutral-600 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-neutral-100">
-                  {transactions.map((transaction, index) => (
-                    <tr
-                      key={transaction.id}
-                      data-transaction-id={transaction.id}
-                      className={`transition-all duration-200 group ${
-                        highlightedIndex === index ? "bg-purple-100" : ""
-                      }`}
-                    >
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-neutral-700 font-light">
-                        {transaction.date}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-neutral-900 font-normal">
-                        {transaction.description}
-                      </td>
-                      <td 
-                        className="px-4 py-3 whitespace-nowrap text-sm font-medium tabular-nums text-right cursor-pointer hover:bg-neutral-50 transition-colors select-none"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onTypeChange) {
-                            onTypeChange(index, transaction.type === "cargo" ? "abono" : "cargo");
-                          }
-                        }}
+            {/* Contenedor de tabla con padding */}
+            <div className="h-full px-12 py-6 pb-24">
+              <div className="h-full overflow-auto hide-scrollbar">
+                <table className="w-full border-collapse">
+                  <thead className="sticky top-0 bg-white z-20 border-b-2 border-neutral-300">
+                    <tr>
+                      <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider border-r border-neutral-200">
+                        Fecha
+                      </th>
+                      <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider border-r border-neutral-300">
+                        Descripción
+                      </th>
+                      <th className="px-4 py-2.5 text-right text-xs font-medium text-neutral-400 uppercase tracking-wider border-r border-neutral-200">
+                        Monto
+                      </th>
+                      <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider border-r border-neutral-300">
+                        Categoría
+                      </th>
+                      <th className="px-4 py-2.5 text-center text-xs font-medium text-neutral-400 uppercase tracking-wider border-r border-neutral-200">
+                        Recurrente
+                      </th>
+                      <th className="px-4 py-2.5 text-center text-xs font-medium text-neutral-400 uppercase tracking-wider border-r border-neutral-200">
+                        IA
+                      </th>
+                      <th className="px-4 py-2.5 text-center text-xs font-medium text-neutral-400 uppercase tracking-wider w-12"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((transaction, index) => (
+                      <tr
+                        key={transaction.id}
+                        data-transaction-id={transaction.id}
+                        className={`hover:bg-neutral-50/50 transition-colors group border-b border-neutral-200 ${
+                          highlightedIndex === index ? "bg-purple-50" : ""
+                        }`}
                       >
-                        <span
-                          className={
-                            transaction.type === "cargo"
-                              ? "text-red-600"
-                              : "text-green-600"
-                          }
-                        >
-                          {transaction.type === "cargo" ? "-" : "+"}
-                          {formatMoney(transaction.amount)}
-                        </span>
-                      </td>
-                      <td
-                        className="px-4 py-3"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <select
-                          value={
-                            transaction.selectedCategory ||
-                            transaction.suggestedCategory ||
-                            ""
-                          }
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            onCategoryChange(index, e.target.value);
-                          }}
-                          className="inline-flex items-center text-xs font-medium px-2.5 py-1 bg-neutral-100 text-neutral-700 rounded-md appearance-none cursor-pointer
-                                   focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-0 transition-all duration-200 hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
-                        >
-                          {categories.map((cat) => (
-                            <option key={cat} value={cat}>
-                              {cat}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td
-                        className="px-4 py-3 text-center"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <label className="inline-flex items-center cursor-pointer">
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              checked={transaction.isRecurring || false}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                onRecurringChange(index, e.target.checked);
-                              }}
-                              className="sr-only peer"
-                            />
-                            <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-900 peer-focus:ring-offset-0 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
-                          </div>
-                        </label>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {transaction.confidence === "low" ||
-                        transaction.confidence === "ai" ? (
-                          <span className="inline-flex items-center text-xs font-medium px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md">
-                            IA
-                          </span>
-                        ) : (
-                          <span className="text-sm text-neutral-300">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <button
+                        <td className="px-4 py-3 text-neutral-500 whitespace-nowrap text-sm font-light border-r border-neutral-200">
+                          {transaction.date}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-900 text-sm font-normal border-r border-neutral-300">
+                          {transaction.description}
+                        </td>
+                        <td
+                          className="px-4 py-3 whitespace-nowrap text-sm font-medium tabular-nums text-right cursor-pointer hover:bg-neutral-50 transition-colors select-none border-r border-neutral-200"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onDelete(index);
+                            if (onTypeChange) {
+                              onTypeChange(
+                                index,
+                                transaction.type === "cargo" ? "abono" : "cargo"
+                              );
+                            }
                           }}
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors duration-200 cursor-pointer group"
-                          title="Eliminar transacción"
                         >
-                          <Trash className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          <span
+                            className={
+                              transaction.type === "cargo"
+                                ? "text-red-600"
+                                : "text-green-600"
+                            }
+                          >
+                            {transaction.type === "cargo" ? "-" : "+"}
+                            {formatMoney(transaction.amount)}
+                          </span>
+                        </td>
+                        <td
+                          className="px-4 py-3 group border-r border-neutral-300"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <TableSelect
+                            value={
+                              transaction.selectedCategory ||
+                              transaction.suggestedCategory ||
+                              ""
+                            }
+                            options={categories}
+                            onChange={(value) => onCategoryChange(index, value)}
+                            isAISuggested={
+                              !transaction.selectedCategory &&
+                              (transaction.confidence === "ai" ||
+                                transaction.confidence === "low")
+                            }
+                          />
+                        </td>
+                        <td
+                          className="px-4 py-3 text-center border-r border-neutral-200"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <label className="inline-flex items-center cursor-pointer">
+                            <div className="relative">
+                              <input
+                                type="checkbox"
+                                checked={transaction.isRecurring || false}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  onRecurringChange(index, e.target.checked);
+                                }}
+                                className="sr-only peer"
+                              />
+                              <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-neutral-900 peer-focus:ring-offset-0 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
+                            </div>
+                          </label>
+                        </td>
+                        <td className="px-4 py-3 text-center border-r border-neutral-200">
+                          {transaction.confidence === "low" ||
+                          transaction.confidence === "ai" ? (
+                            <span className="inline-flex items-center text-xs font-medium px-2 py-0.5 bg-purple-50 text-purple-700 rounded">
+                              IA
+                            </span>
+                          ) : (
+                            <span className="text-sm text-neutral-300">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete(index);
+                            }}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded text-neutral-300 hover:text-red-600 hover:bg-red-50 transition-colors duration-200 cursor-pointer opacity-0 group-hover:opacity-100"
+                            title="Eliminar transacción"
+                          >
+                            <Trash className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
           {/* Barra flotante inferior */}
@@ -612,15 +633,15 @@ export const CategorizeScreen = ({
         />
 
         {/* Content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 pb-24">
+        <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 pb-24 relative z-10">
           {current && (
-        <TransactionCard
-          transaction={current}
-          slideDirection={slideDirection}
-          onCategoryChange={handleCategoryChange}
-          onRecurringChange={handleRecurringChange}
-          onTypeChange={handleTypeChange}
-        />
+            <TransactionCard
+              transaction={current}
+              slideDirection={slideDirection}
+              onCategoryChange={handleCategoryChange}
+              onRecurringChange={handleRecurringChange}
+              onTypeChange={handleTypeChange}
+            />
           )}
         </div>
 

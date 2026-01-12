@@ -31,8 +31,8 @@ export const ConfirmDialog = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 space-y-4">
-          <h3 className="text-xl font-light text-neutral-900">{title}</h3>
-          <p className="text-sm font-light text-neutral-600 leading-relaxed">
+          <h3 className="text-2xl font-medium text-neutral-900">{title}</h3>
+          <p className="text-base font-normal text-neutral-600 leading-relaxed">
             {message}
           </p>
         </div>

@@ -302,13 +302,13 @@ export const SearchModal = ({
                 setSelectedResultIndex(0);
               }}
               placeholder="Buscar transacción..."
-              className="w-full px-4 py-3 text-lg font-light text-neutral-900 
+              className="w-full px-4 py-3 text-lg font-medium text-neutral-900 
                        bg-neutral-50 border border-neutral-200 rounded-xl
                        focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent
                        placeholder:text-neutral-400 transition-all duration-200"
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <kbd className="px-2 py-1 text-xs font-light text-neutral-400 bg-neutral-100 rounded border border-neutral-200">
+              <kbd className="px-2 py-1 text-xs font-medium text-neutral-400 bg-neutral-100 rounded border border-neutral-200">
                 Esc
               </kbd>
             </div>
@@ -320,7 +320,7 @@ export const SearchModal = ({
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => toggleFilter("onlyAI", true)}
-                className={`px-4 py-2 text-sm font-light rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
                   ${
                     activeFilters.onlyAI
                       ? "bg-neutral-900 text-white shadow-sm"
@@ -331,7 +331,7 @@ export const SearchModal = ({
               </button>
               <button
                 onClick={() => toggleFilter("type", "cargo")}
-                className={`px-4 py-2 text-sm font-light rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
                   ${
                     activeFilters.type === "cargo"
                       ? "bg-neutral-900 text-white shadow-sm"
@@ -342,7 +342,7 @@ export const SearchModal = ({
               </button>
               <button
                 onClick={() => toggleFilter("type", "abono")}
-                className={`px-4 py-1.5 text-sm font-light rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
+                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
                   ${
                     activeFilters.type === "abono"
                       ? "bg-neutral-900 text-white shadow-sm"
@@ -354,7 +354,7 @@ export const SearchModal = ({
               <div className="flex items-center gap-2 pl-2 border-l border-neutral-200">
                 <button
                   onClick={() => toggleFilter("amountRange", "< $10k")}
-                  className={`px-4 py-2 text-sm font-light rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
                     ${
                       activeFilters.amountRange === "< $10k"
                         ? "bg-neutral-900 text-white shadow-sm"
@@ -365,7 +365,7 @@ export const SearchModal = ({
                 </button>
                 <button
                   onClick={() => toggleFilter("amountRange", "$10k-$50k")}
-                  className={`px-4 py-2 text-sm font-light rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
                     ${
                       activeFilters.amountRange === "$10k-$50k"
                         ? "bg-neutral-900 text-white shadow-sm"
@@ -376,7 +376,7 @@ export const SearchModal = ({
                 </button>
                 <button
                   onClick={() => toggleFilter("amountRange", "> $50k")}
-                  className={`px-4 py-2 text-sm font-light rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer
                     ${
                       activeFilters.amountRange === "> $50k"
                         ? "bg-neutral-900 text-white shadow-sm"
@@ -390,7 +390,7 @@ export const SearchModal = ({
 
             {/* Category Filter */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-light text-neutral-500 px-2">Categoría:</span>
+              <span className="text-xs font-medium text-neutral-500 px-2">Categoría:</span>
               <select
                 value={activeFilters.category || ""}
                 onChange={(e) => {
@@ -404,7 +404,7 @@ export const SearchModal = ({
                     });
                   }
                 }}
-                className="px-4 py-2 text-sm font-light text-neutral-900 
+                className="px-4 py-2 text-sm font-medium text-neutral-900 
                          bg-white border border-neutral-200 rounded-lg
                          focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent
                          transition-all duration-200 min-w-[180px]"
@@ -436,7 +436,7 @@ export const SearchModal = ({
                              checked:bg-neutral-900 checked:border-neutral-900"
                   />
                 </div>
-                <span className="text-sm font-light text-neutral-700 group-hover:text-neutral-900 transition-colors">
+                <span className="text-sm font-medium text-neutral-700 group-hover:text-neutral-900 transition-colors">
                   Seleccionar todas ({filteredTransactions.length})
                 </span>
               </label>
@@ -466,7 +466,7 @@ export const SearchModal = ({
           )}
           <div ref={resultsRef} className="flex-1 overflow-y-auto p-2">
             {filteredTransactions.length === 0 ? (
-              <div className="p-8 text-center text-neutral-400 font-light">
+              <div className="p-8 text-center text-neutral-400 font-medium">
                 {searchQuery
                   ? "No se encontraron resultados"
                   : "Escribe para buscar..."}
@@ -523,7 +523,7 @@ export const SearchModal = ({
                       >
                     <div className="flex items-center justify-between mb-2">
                       <span
-                        className={`text-xs font-light ${
+                        className={`text-xs font-medium ${
                           isSelected ? "text-neutral-300" : "text-neutral-400"
                         }`}
                       >
@@ -532,7 +532,7 @@ export const SearchModal = ({
                       <div className="flex items-center gap-2">
                         {(transaction.confidence === "low" || transaction.confidence === "ai") && (
                           <span
-                            className={`text-xs font-light px-2 py-0.5 rounded-full ${
+                            className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                               isSelected
                                 ? "bg-purple-500/20 text-purple-200"
                                 : "bg-purple-50 text-purple-700"
@@ -548,7 +548,7 @@ export const SearchModal = ({
                               onTypeChange(actualIndex, transaction.type === "cargo" ? "abono" : "cargo");
                             }
                           }}
-                          className={`text-xs font-light px-2 py-0.5 rounded-full cursor-pointer transition-all hover:scale-105 ${
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full cursor-pointer transition-all hover:scale-105 ${
                             transaction.type === "cargo"
                               ? isSelected
                                 ? "bg-red-500/20 text-red-200 hover:bg-red-500/30"
@@ -563,7 +563,7 @@ export const SearchModal = ({
                       </div>
                     </div>
                     <p
-                      className={`text-sm font-normal mb-1 ${
+                      className={`text-base font-medium mb-1 ${
                         isSelected ? "text-white" : "text-neutral-900"
                       }`}
                     >
@@ -571,7 +571,7 @@ export const SearchModal = ({
                     </p>
                         <div className="flex items-center justify-between">
                           <span
-                            className={`text-sm font-light tabular-nums ${
+                            className={`text-sm font-medium tabular-nums ${
                               transaction.type === "cargo"
                                 ? isSelected
                                   ? "text-red-200"
@@ -586,7 +586,7 @@ export const SearchModal = ({
                           </span>
                           {isCurrent && (
                             <span
-                              className={`text-xs font-light px-2 py-0.5 rounded-full ${
+                              className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                                 isSelected
                                   ? "bg-neutral-700 text-neutral-200"
                                   : "bg-neutral-200 text-neutral-600"
@@ -603,7 +603,7 @@ export const SearchModal = ({
                             e.stopPropagation();
                             selectSimilar(transaction.description);
                           }}
-                          className="text-xs font-light text-neutral-400 hover:text-neutral-600 px-2 py-1 rounded hover:bg-neutral-200 transition-colors cursor-pointer"
+                          className="text-xs font-medium text-neutral-400 hover:text-neutral-600 px-2 py-1 rounded hover:bg-neutral-200 transition-colors cursor-pointer"
                           title="Seleccionar similares"
                         >
                           Similares
@@ -620,7 +620,7 @@ export const SearchModal = ({
 
         {/* Footer */}
         {filteredTransactions.length > 0 && (
-          <div className="p-4 border-t border-neutral-200 text-xs text-neutral-400 font-light text-center">
+          <div className="p-4 border-t border-neutral-200 text-xs text-neutral-400 font-medium text-center">
             {filteredTransactions.length} resultado
             {filteredTransactions.length !== 1 ? "s" : ""} · Usa ↑ ↓ para
             navegar · Enter para seleccionar

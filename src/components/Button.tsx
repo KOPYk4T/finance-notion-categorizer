@@ -18,9 +18,9 @@ const VARIANT_STYLES: Record<ButtonVariant, string> = {
 };
 
 const SIZE_STYLES: Record<ButtonSize, string> = {
-  sm: "px-3 py-2 text-sm rounded-lg",
-  md: "px-4 py-2.5 text-sm rounded-xl",
-  lg: "px-10 py-4 text-lg rounded-2xl",
+  sm: "px-3 py-2 text-sm rounded",
+  md: "px-4 py-2.5 text-sm rounded",
+  lg: "px-10 py-4 text-lg rounded",
 };
 
 export const Button = ({
