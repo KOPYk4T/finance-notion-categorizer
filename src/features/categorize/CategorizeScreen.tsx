@@ -634,7 +634,7 @@ export const CategorizeScreen = ({
 
         {/* Content */}
         <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 pb-24 relative z-10">
-          {current && (
+          {current ? (
             <TransactionCard
               transaction={current}
               slideDirection={slideDirection}
@@ -642,6 +642,17 @@ export const CategorizeScreen = ({
               onRecurringChange={handleRecurringChange}
               onTypeChange={handleTypeChange}
             />
+          ) : (
+            <div className="flex flex-col items-center gap-6">
+              <img
+                src="/empty-state-final.png"
+                alt="Sin transacciones"
+                className="w-64 h-auto opacity-90"
+              />
+              <p className="text-neutral-400 text-sm">
+                No hay transacciones para mostrar
+              </p>
+            </div>
           )}
         </div>
 

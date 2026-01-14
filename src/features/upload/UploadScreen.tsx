@@ -37,9 +37,9 @@ export const UploadScreen = ({ onFileSelect }: UploadScreenProps) => {
           }}
         >
           <img
-            src="/Box.svg"
-            alt="Upload"
-            className="w-52 h-52 animate-sketchy"
+            src="/import-files-final.png"
+            alt="Importar archivos"
+            className="w-72 h-auto"
           />
         </motion.div>
 
